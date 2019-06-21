@@ -1,5 +1,6 @@
 require_relative 'base/saver'
 require_relative 'base/storage'
+require_relative 'base/download_helpers'
 
 module Kimurai
   class Base
@@ -26,7 +27,7 @@ module Kimurai
     ###
 
     class << self
-      attr_reader :run_info, :savers, :storage
+      attr_reader :run_info, :savers, :storage, :download_helper
     end
 
     def self.running?
@@ -103,6 +104,7 @@ module Kimurai
       logger.error "Spider: already running: #{name}" and return false if running?
 
       @storage = Storage.new
+      @download_helper = DownloadHelper.new(@config[:download_folder] || File.join(ENV['HOME'], 'Downloads'))
       @savers = {}
       @update_mutex = Mutex.new
 
@@ -149,7 +151,7 @@ module Kimurai
         message = "Spider: stopped: #{@run_info.merge(running_time: @run_info[:running_time]&.duration)}"
         failed? ? logger.fatal(message) : logger.info(message)
 
-        @run_info, @storage, @savers, @update_mutex = nil
+        @run_info, @storage, @savers, @update_mutex, @download_helper = nil
       end
     end
 
@@ -232,6 +234,17 @@ module Kimurai
 
       @savers[path].save(item)
     end
+
+    def wait_for_download
+      @download_helper ||=  self.with_info ? self.class.download_helper : DownloadHelper.new(@config[:download_folder] || File.join(ENV['HOME'], 'Downloads'))
+      @download_helper.wait_for_download
+    end
+
+
+    def download_content
+      @download_helper.download_content
+    end
+
 
     ###
 
