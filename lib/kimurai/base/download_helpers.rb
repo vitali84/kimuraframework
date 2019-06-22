@@ -1,10 +1,11 @@
 #https://collectiveidea.com/blog/archives/2012/01/27/testing-file-downloads-with-capybara-and-chromedriver
+# its not thread safe, use with caution
 module Kimurai
   class Base
     class DownloadHelper
       attr_reader :path, :timeout
 
-      def initialize(path, timeout = 30)
+      def initialize(path, timeout = 60)
         #path for downloads
         @path = path
         @timeout = timeout
@@ -12,43 +13,53 @@ module Kimurai
       end
 
       def downloads
-        @mutex.synchronize do
-          Dir[path.join("*")]
-        end
+          Dir[File.join(path,"*")]
       end
 
-      def download
-        @mutex.synchronize do
-          downloads.first
-        end
+      def before_download_start
+        @dir_before_download = downloads
+      end
+
+      def downloaded_filename
+          downloaded = downloads - @dir_before_download
+          if downloaded.size > 1
+            raise "more than one file appeared after download"
+          elsif  downloaded.size  == 0
+            raise "Nothing was downloaded"
+          end
+          downloaded.first
       end
 
       def download_content
+        file = nil
+        filename = nil
         @mutex.synchronize do
+          sleep 2 #wait until download started
           wait_for_download
-          File.read(download)
+          filename = downloaded_filename
+          file = File.read(filename)
         end
+        {file_name: filename, file_content: file}
+      end
+
+      def delete_downloaded
+        filename = downloaded_filename
+        FileUtils.rm_f(filename)
+        filename
       end
 
       def wait_for_download
-        @mutex.synchronize do
-          Timeout.timeout(timeout) do
-            sleep 0.1 until downloaded?
-          end
+        Timeout.timeout(timeout) do
+          sleep 0.1 until downloaded?
         end
       end
 
       def downloaded?
-        @mutex.synchronize do
-          !downloading? && downloads.any?
-        end
+        !downloading? && downloads.any?
       end
 
       def downloading?
-        @mutex.synchronize do
           downloads.grep(/\.crdownload$/).any?
-        end
-
       end
 
       def clear_downloads

@@ -27,7 +27,7 @@ module Kimurai
     ###
 
     class << self
-      attr_reader :run_info, :savers, :storage, :download_helper
+      attr_reader :run_info, :savers, :storage, :download_helpers
     end
 
     def self.running?
@@ -104,8 +104,8 @@ module Kimurai
       logger.error "Spider: already running: #{name}" and return false if running?
 
       @storage = Storage.new
-      @download_helper = DownloadHelper.new(@config[:download_folder] || File.join(ENV['HOME'], 'Downloads'))
       @savers = {}
+      @download_helpers = {}
       @update_mutex = Mutex.new
 
       @run_info = {
@@ -151,7 +151,7 @@ module Kimurai
         message = "Spider: stopped: #{@run_info.merge(running_time: @run_info[:running_time]&.duration)}"
         failed? ? logger.fatal(message) : logger.info(message)
 
-        @run_info, @storage, @savers, @update_mutex, @download_helper = nil
+        @run_info, @storage, @savers, @update_mutex, @download_helpers = nil
       end
     end
 
@@ -186,6 +186,7 @@ module Kimurai
 
       @logger = self.class.logger
       @savers = {}
+      @download_helpers = {}
     end
 
     def browser
@@ -235,15 +236,31 @@ module Kimurai
       @savers[path].save(item)
     end
 
-    def wait_for_download
-      @download_helper ||=  self.with_info ? self.class.download_helper : DownloadHelper.new(@config[:download_folder] || File.join(ENV['HOME'], 'Downloads'))
-      @download_helper.wait_for_download
+
+    def before_download_start
+      current_url = browser.current_url
+      @download_helpers[current_url] ||= DownloadHelper.new(@config[:download_folder] || File.join(ENV['HOME'], 'Downloads'))
+      @download_helpers[current_url].before_download_start
+      logger.info("Spider: Downloading file from page %s" % current_url)
+
+    end
+
+    #wait for download and return downloaded
+    def downloaded_file
+      current_url = browser.current_url
+      file = @download_helpers[current_url].download_content
+      logger.info("Spider: Download finished page: %s,  file: %s" % [current_url,file[:file_name]])
+      file
+    end
+
+    def delete_downloaded
+      current_url = browser.current_url
+      file = @download_helpers[current_url].delete_downloaded
+      logger.info("Spider: removing finished page: %s,  file: %s" % [current_url,file])
+      file
     end
 
 
-    def download_content
-      @download_helper.download_content
-    end
 
 
     ###
