@@ -236,10 +236,15 @@ module Kimurai
       @savers[path].save(item)
     end
 
-    #Block which within a download happends
-    def download_file(&block)
+    #Block which within a download happends, first param is target of downloaded file
+    def download_file(*download_folder,&block)
+
+      download_folder = download_folder.try(:first) || @config[:download_folder] || File.join(ENV['HOME'], 'Downloads')
+
       current_url = browser.current_url
-      @download_helpers[current_url] ||= DownloadHelper.new(@config[:download_folder] || File.join(ENV['HOME'], 'Downloads'))
+      #this is needed to chrome to work in healess mode
+      browser.driver.browser.download_path = download_folder
+      @download_helpers[current_url] ||= DownloadHelper.new(download_folder)
       @download_helpers[current_url].before_download_start
       logger.info("Spider: Downloading file from page %s" % current_url)
       block.call

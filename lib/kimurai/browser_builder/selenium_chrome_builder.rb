@@ -111,6 +111,7 @@ module Kimurai::BrowserBuilder
 
         profile = Selenium::WebDriver::Chrome::Profile.new
         profile["download.prompt_for_download"] = false
+        profile["download.directory_upgrade"] = true
 
         if download_folder = @config[:download_folder].presence
           profile["download.default_directory"] = download_folder
