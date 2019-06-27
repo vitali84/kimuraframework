@@ -31,15 +31,13 @@ module Kimurai
       end
 
       def download_content
-        file = nil
-        filename = nil
+        file_path = nil
         @mutex.synchronize do
           wait_for_download_start #wait until download started
           wait_for_download
-          filename = downloaded_filename
-          file = File.read(filename)
+          file_path = downloaded_filename
         end
-        {file_name: filename, file_content: file}
+        file_path
       end
 
       def delete_downloaded

@@ -236,20 +236,16 @@ module Kimurai
       @savers[path].save(item)
     end
 
-
-    def before_download_start
+    #Block which within a download happends
+    def download_file(&block)
       current_url = browser.current_url
       @download_helpers[current_url] ||= DownloadHelper.new(@config[:download_folder] || File.join(ENV['HOME'], 'Downloads'))
       @download_helpers[current_url].before_download_start
       logger.info("Spider: Downloading file from page %s" % current_url)
-
-    end
-
-    #wait for download and return downloaded
-    def downloaded_file
+      block.call
       current_url = browser.current_url
       file = @download_helpers[current_url].download_content
-      logger.info("Spider: Download finished page: %s,  file: %s" % [current_url,file[:file_name]])
+      logger.info("Spider: Download finished page: %s,  file: %s" % [current_url,file])
       file
     end
 
