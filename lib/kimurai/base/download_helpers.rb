@@ -34,7 +34,7 @@ module Kimurai
         file = nil
         filename = nil
         @mutex.synchronize do
-          sleep 2 #wait until download started
+          wait_for_download_start #wait until download started
           wait_for_download
           filename = downloaded_filename
           file = File.read(filename)
@@ -47,6 +47,15 @@ module Kimurai
         FileUtils.rm_f(filename)
         filename
       end
+
+      #this means any file appeared
+      def wait_for_download_start
+        Timeout.timeout(timeout) do
+          sleep 0.1 until (downloads - @dir_before_download).size > 0
+        end
+      end
+
+
 
       def wait_for_download
         Timeout.timeout(timeout) do
