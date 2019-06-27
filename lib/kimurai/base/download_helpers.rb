@@ -5,7 +5,7 @@ module Kimurai
     class DownloadHelper
       attr_reader :path, :timeout
 
-      def initialize(path, timeout = 60)
+      def initialize(path, timeout = 120)
         #path for downloads
         @path = path
         @timeout = timeout
