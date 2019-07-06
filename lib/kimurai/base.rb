@@ -241,16 +241,14 @@ module Kimurai
     def download_file(download_folder,&block)
 
       download_folder = download_folder || @config[:download_folder]
-
-      current_url = browser.current_url
       #this is needed to chrome to work in healess mode
       browser.driver.browser.download_path = download_folder
       @download_helpers[download_folder] ||= DownloadHelper.new(download_folder)
       @download_helpers[download_folder].before_download_start
-      logger.info("Spider: Downloading file from page %s" % current_url)
-      block.call
+      logger.info("Spider: Downloading file from page %s" %  browser.current_url)
+      yield
       file = @download_helpers[download_folder].download_content
-      logger.info("Spider: Download finished page: %s,  file: %s" % [current_url,file])
+      logger.info("Spider: Download finished page: %s,  file: %s" % [ browser.current_url,file])
       file
     end
 
