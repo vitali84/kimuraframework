@@ -239,14 +239,22 @@ module Kimurai
     #Block which within a download happens, first param is target of downloaded file
     # in best practive download foder would be unique, to prevent concurrency issues
     def download_file(download_folder,&block)
+      before_download_start(download_folder)
+      yield
+      wait_for_download_and_return(download_folder)
+    end
 
+    #there is misterious issue with iframe and window for download, doesnt always work
+    def before_download_start(download_folder)
       download_folder = download_folder || @config[:download_folder]
       #this is needed to chrome to work in healess mode
-      browser.driver.browser.download_path = download_folder
+      #browser.driver.browser.download_path = download_folder
       @download_helpers[download_folder] ||= DownloadHelper.new(download_folder)
       @download_helpers[download_folder].before_download_start
       logger.info("Spider: Downloading file from page %s" %  browser.current_url)
-      yield
+    end
+
+    def wait_for_download_and_return(download_folder)
       file = @download_helpers[download_folder].download_content
       logger.info("Spider: Download finished page: %s,  file: %s" % [ browser.current_url,file])
       file
