@@ -237,30 +237,22 @@ module Kimurai
     end
 
     #Block which within a download happends, first param is target of downloaded file
-    def download_file(*download_folder,&block)
+    # in best practive download foder would be unique, to prevent concurrency issues
+    def download_file(download_folder,&block)
 
-      download_folder = download_folder.try(:first) || @config[:download_folder] || File.join(ENV['HOME'], 'Downloads')
+      download_folder = download_folder || @config[:download_folder]
 
       current_url = browser.current_url
       #this is needed to chrome to work in healess mode
       browser.driver.browser.download_path = download_folder
-      @download_helpers[current_url] ||= DownloadHelper.new(download_folder)
-      @download_helpers[current_url].before_download_start
+      @download_helpers[download_folder] ||= DownloadHelper.new(download_folder)
+      @download_helpers[download_folder].before_download_start
       logger.info("Spider: Downloading file from page %s" % current_url)
       block.call
-      current_url = browser.current_url
-      file = @download_helpers[current_url].download_content
+      file = @download_helpers[download_folder].download_content
       logger.info("Spider: Download finished page: %s,  file: %s" % [current_url,file])
       file
     end
-
-    def delete_downloaded
-      current_url = browser.current_url
-      file = @download_helpers[current_url].delete_downloaded
-      logger.info("Spider: removing finished page: %s,  file: %s" % [current_url,file])
-      file
-    end
-
 
 
 
