@@ -236,7 +236,7 @@ module Kimurai
       @savers[path].save(item)
     end
 
-    #Block which within a download happends, first param is target of downloaded file
+    #Block which within a download happens, first param is target of downloaded file
     # in best practive download foder would be unique, to prevent concurrency issues
     def download_file(download_folder,&block)
 
