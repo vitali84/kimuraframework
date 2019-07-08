@@ -110,6 +110,22 @@ module Kimurai::BrowserBuilder
           end
         end
 
+        driver_options.profile["browser.helperApps.neverAsk.saveToDisk"] = 'text/csv;application/CSV;application/msword;image/png;application/pdf;text/plain;application/zip;application/x-zip;application/vnd.ms-excel;application/octet-stream;")'
+        driver_options.profile["browser.helperApps.alwaysAsk.force"] = false
+        driver_options.profile['browser.download.manager.showWhenStarting'] = false
+        driver_options.profile['browser.download.manager.alertOnEXEOpen'] = false
+
+        driver_options.profile['browser.download.manager.showWhenStarting'] = false
+        driver_options.profile['browser.download.manager.focusWhenStarting'] = false
+        driver_options.profile['browser.download.useDownloadDir'] = true
+        driver_options.profile['browser.download.manager.showAlertOnComplete'] = true
+        driver_options.profile['pdfjs.disabled'] = true
+        driver_options.profile['browser.download.folderList'] = 2
+
+        if download_folder = @config[:download_folder].presence
+          driver_options.profile["browser.download.dir"] = download_folder
+        end
+
         Capybara::Selenium::Driver.new(app, browser: :firefox, options: driver_options)
       end
 
