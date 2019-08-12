@@ -26,6 +26,7 @@ module Kimurai::BrowserBuilder
         driver_options.profile = Selenium::WebDriver::Firefox::Profile.new
         driver_options.profile["browser.link.open_newwindow"] = 3 # open windows in tabs
         driver_options.profile["media.peerconnection.enabled"] = false # disable web rtc
+        driver_options.log_level = :debug
 
         # Proxy
         if proxy = @config[:proxy].presence
