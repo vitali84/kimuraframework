@@ -111,7 +111,7 @@ module Kimurai::BrowserBuilder
           end
         end
 
-        driver_options.profile["browser.helperApps.neverAsk.saveToDisk"] = 'text/csv;application/CSV;application/msword;image/png;application/pdf;text/plain;application/zip;application/x-zip;application/vnd.ms-excel;application/octet-stream;application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;application/vnd.ms-excel")'
+        driver_options.profile["browser.helperApps.neverAsk.saveToDisk"] = 'text/csv;application/CSV;application/msword;image/png;application/pdf;text/plain;application/zip;application/x-zip;application/vnd.ms-excel;application/octet-stream;application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;application/ms-excel")'
         driver_options.profile["browser.helperApps.alwaysAsk.force"] = false
         driver_options.profile['browser.download.manager.showWhenStarting'] = false
         driver_options.profile['browser.download.manager.alertOnEXEOpen'] = false
