@@ -119,7 +119,12 @@ module Kimurai::BrowserBuilder
 
         chromedriver_path = Kimurai.configuration.chromedriver_path || "/usr/local/bin/chromedriver"
         service = Selenium::WebDriver::Service.chrome(path: chromedriver_path)
-        Capybara::Selenium::Driver.new(app, browser: :chrome, options: driver_options, service: service, profile: profile)
+        driver = Capybara::Selenium::Driver.new(app, browser: :chrome, options: driver_options, service: service, profile: profile)
+
+        if download_folder = @config[:download_folder].presence
+          driver.browser.download_path = download_folder
+        end
+        driver
       end
 
       # Create browser instance (Capybara session)
